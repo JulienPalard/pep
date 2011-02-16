@@ -1,0 +1,14 @@
+= pep =
+pep is an utility to :
+ * read
+ * search
+ * maintain an updated local version
+of Python Enhancement Proposals from command line :
+
+ * pep 8 // To read the PEP 8
+ * pep search guido // To search guido
+ * pep upgrade // To update local version of PEPs
+ * pep upgrade with progress // To update local version showing a progression
+
+Use the `pep upgrade with progress` the first time !
+
