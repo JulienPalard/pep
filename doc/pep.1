@@ -1,0 +1,71 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH PEP 1 "April 12, 2011"
+.\" Please adjust this date whenever revising the manpage.
+.SH "NAME"
+pep \- Command-line PEP reader
+.SH "SYNOPSIS"
+.B pep
+.I PEP_NUMBER
+.br
+.B pep upgrade
+.RI [ with\ progress ]
+.br
+.B pep search
+.RI [ OPTIONS ]
+.I PATTERN
+
+.SH "DESCRIPTION"
+\fBpep\fP is a command-line PEP reader. It keeps a local repository of PEPs
+for fast searching and offline reading.  Features are : upgrading local PEPs
+repository, reading a PEP, searching a pattern in PEPs.
+.PP
+.SH "OPTIONS"
+.TP
+.B upgrade
+Upgrade local PEP repository for new PEPs
+.TP
+.B \-h, \-\-help
+List options with some help.
+.TP
+.B search
+The search option uses grep, so all grep options are useable here, see man grep.
+
+.SH "EXAMPLES"
+.PP
+Here are some \fBpep\fP usage examples.
+.PP
+.PP
+\fBpep 8\fR
+.PP
+Read the PEP 8 using your local pager.
+.PP
+\fBpep upgrade\fR
+.PP
+Upgrade local PEPs repository.
+.PP
+\fBpep upgrade with progress\fR
+.PP
+Upgrade local PEPs repository with a progression indicator.
+.PP
+\fBpep search Guido\fR
+.PP
+Search for 'Guido'
+.PP
+\fBpep search \-i guido\fR
+.PP
+Case insensitive search for 'guido', for all options, see 'man grep'
+.PP
+\fBpep search -Ei ros{2}um\fR
+.PP
+Search for the regex ros{2}um using extended regular expression, see  man grep'
+.SH "SEE ALSO"
+pep8(1), less(1), more(1), most(1)
+.br
+.SH "AUTHOR"
+pep was written by Julien Palard.
+.PP
+This manual page was written by Julien Palard <julien@palard.fr>,
+for the Debian project (and may be used by others).
