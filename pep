@@ -1,13 +1,14 @@
 #!/bin/sh
 
-URL='http://svn.python.org/projects/peps/trunk/'
-PEP_PATH='/usr/share/doc/python-pep/'
+PEP_REPOSITORY='http://svn.python.org/projects/peps/trunk/'
+LOCAL_PEP_PATH='/usr/share/doc/python-pep/'
 PEP_REGEX='pep-[0-9]+\.txt'
 
 fail_due_to_rights()
 {
-    echo "You have to be root to upgrade Python PEPs" 1>&2
-    echo "As your PEP_PATH is $PEP_PATH" 1>&2
+    echo "Failed to upgrade local PEPs repository" >&2
+    echo "As your LOCAL_PEP_PATH is $LOCAL_PEP_PATH and it's nor writeable" >&2
+    echo "Shouldn't you try to run it as root ?" >&2
     exit 1
 }
 
@@ -15,22 +16,20 @@ upgrade()
 {
     PROGRESS="$1"
 
-    [ ! -d $PEP_PATH -a ! -w $(basename "$PEP_PATH") ] && fail_due_to_rights
-    mkdir -p "$PEP_PATH"
-    [ ! -w $PEP_PATH ] && fail_due_to_rights
-    cd "$PEP_PATH"
-    LIST="$(wget -qO - $URL \
+    mkdir -p "$LOCAL_PEP_PATH" 2>/dev/null
+    [ -w "$LOCAL_PEP_PATH" ] || fail_due_to_rights
+    cd "$LOCAL_PEP_PATH"
+    LIST="$(wget -qO - $PEP_REPOSITORY \
             | grep -oE "$PEP_REGEX" \
-            | sort \
-            | uniq)"
-    LENGTH=$(echo "$LIST" | wc -l)
+            | sort | uniq)"
+    LENGTH=$(printf "%s" "$LIST" | wc -l)
     COUNT=0
-    [ -n "$PROGRESS" ] && echo Downloading PEPs...
-    echo "$LIST" | while read PEP
+    [ -n "$PROGRESS" ] && echo "Downloading PEPs..."
+    printf "%s\n" "$LIST" | while read PEP
     do
         COUNT=$((COUNT + 1))
         [ -n "$PROGRESS" ] && echo -n "\r$(($COUNT * 100 / $LENGTH))%"
-        wget -qN $URL/$PEP
+        wget -qN "$PEP_REPOSITORY/$PEP"
     done
     [ -n "$PROGRESS" ] && echo "\rDone !"
 }
@@ -38,16 +37,53 @@ upgrade()
 show()
 {
     PEP_NUMBER="$(printf "%04i\n" $1)"
-    pager "$PEP_PATH/pep-$PEP_NUMBER.txt"
+    PEP_FILE="$LOCAL_PEP_PATH/pep-$PEP_NUMBER.txt"
+
+    if [ -f "$PEP_FILE" ]
+    then
+        pager "$LOCAL_PEP_PATH/pep-$PEP_NUMBER.txt"
+    else
+        echo "PEP $PEP_NUMBER is not found in the local PEPs repository" >&2
+        echo "Try '$0 upgrade with progress' to fetch it from the internet" >&2
+    fi
 }
 
 search()
 {
-    cd "$PEP_PATH"
-    grep --color=always "$1" *
+    cd "$LOCAL_PEP_PATH"
+    grep --color=always $* * | sed 's/.txt//'
+}
+
+help()
+{
+    cat <<HELP
+Usage:
+    Reading a PEP :
+      $ $0 PEP_NUMBER
+    example:
+      $ $0 8
+
+    Upgrading local PEPs repository :
+      $ $0 upgrade
+    Or the verbose version:
+      $ $0 upgrade with progress
+
+    Searching for a word / regex into PEPs :
+      $ $0 search [OPTIONS] PATTERN
+    Search uses grep, so all grep options are available here, examples :
+      $ $0 search guido | head -n 1
+      pep-0007.txt:Author: guido@python.org (Guido van Rossum)
+      $ $0 search -i guido
+      pep-0001:Dictator for Life, Guido van Rossum) can be consulted during the
+      $ $0 search -Ei ros{2}um | head -n 1
+      pep-0001:Dictator for Life, Guido van Rossum) can be consulted during the
+HELP
 }
 
 case $1 in
+    "" | "-h" | "--help")
+        help
+        ;;
     upgrade)
         upgrade $2
         ;;
